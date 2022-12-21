@@ -1,6 +1,5 @@
 """Tests for the usr api"""
 
-from os import stat
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -85,6 +84,17 @@ class PublicUserApiTests(TestCase):
         """Test that token is not created if invalid credentials are given"""
         create_user(email="test@example.com", password="goodpass")
         payload = {'email': "test@example.com",'password': 'badpass'}
+        
+
+        res = self.client.post(TOKEN_URL, payload)
+        self.assertNotIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_token_email_not_found(self):
+        """Test error returned if user not found for given email."""
+        payload = {'email': 'test@example.com', 'password': 'pass123'}
+        
+
         res = self.client.post(TOKEN_URL, payload)
 
         self.assertNotIn('token', res.data)
